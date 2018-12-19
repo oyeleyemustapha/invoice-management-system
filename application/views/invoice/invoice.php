@@ -41,17 +41,15 @@
                                   </div>
 
                                   <div class="form-group">
-
                                     <div class="input-group">
                                       <div class="input-group-addon">Invoice Type</div>
-                                       <select class="form-control" name="type" required="">
+                                       <select class="form-control" name="type" id="invoiceType" required="">
                                           <option value="Client">Client</option>
                                            <option value="Tax">Tax</option>
                                         </select>
                                     </div>
-                                    
-
                                   </div>
+                                  <div class="append"></div>
 
                                    <div class="form-group due_date">
 

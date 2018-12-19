@@ -125,17 +125,17 @@ class Invoice extends CI_Controller {
 		}
 	}
 
-	//GENERATE ANNUAL SALES REPORT
-	public function sales_reports_annual(){
+	//GENERATE ANNUAL REPORT
+	public function annual_report(){
 		$this->verify();
 		$this->load->library('form_validation');
-		$this->form_validation->set_rules('year', 'Sales Year', 'required');
+		$this->form_validation->set_rules('year', 'Year', 'required');
 		if($this->form_validation->run()){
-			$data['cafeteria']=$this->cafeteria_model->fetch_cafeteria()->NAME;
 			$data['date']=$this->input->post('year');
-			$data['report']=$this->cafeteria_model->sales_report_annual($this->input->post('year'));
-			$this->load->view('administrator/reports/generalYearsales',$data);
+			$data['report']=$this->invoice_model->annual_report($this->input->post('year'));
+			$this->load->view('reports/annualReports',$data);
 		}
+
 	}
 
 
@@ -447,7 +447,18 @@ class Invoice extends CI_Controller {
 		$this->form_validation->set_rules('type', 'Invoice Type', 'required');
 		if($this->form_validation->run()){
 			$this->load->helper('string');
-			$ref_no=random_string('numeric', 6);
+
+			if($this->input->post('type')=='Tax'){
+				$ref_no=$this->input->post('ref_no');
+			}
+			else{
+				$ref_no=random_string('numeric', 6);
+			}
+
+
+
+
+			
 			for ($i=0; $i < count($_POST['item']) ; $i++) { 
 				
 				$invoice=array(

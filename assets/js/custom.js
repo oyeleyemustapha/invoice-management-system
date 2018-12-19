@@ -376,6 +376,15 @@ $('.createInvoice').click(function(){
   $('.invoice-List').load(base_url_admin+'fetch_invoices', invoice_cb);
 
 
+  $('#invoiceType').change(function(){
+      if($(this).val()=="Tax"){
+        var html='<div class="form-group"><div class="input-group">';
+        html+='<div class="input-group-addon">Reference No</div><input type="text" class="form-control" name="ref_no" required></div></div>';
+        $('.append').append(html);
+      }
+  });
+
+
 
 
 

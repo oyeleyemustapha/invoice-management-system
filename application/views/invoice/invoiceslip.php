@@ -133,7 +133,7 @@
 
 
 
-                                if($invoice[0]->STATUS=="Not Paid"){
+                                if($invoice[0]->STATUS=="NOT PAID"){
                                     echo'<strong>Due:</strong>'. date("F d, Y", strtotime($invoice[0]->DUE_DATE));
                                 }
                                echo'
@@ -184,7 +184,11 @@
             
             $total=0;
             foreach ($invoice as $invoice) {
+            $VAT=(5/100)*$invoice->AMOUNT;
               $total+=$invoice->AMOUNT;
+
+
+
               echo"
                 <tr class='item'>
                 <td>
@@ -205,9 +209,39 @@
             
             
             
-           
+           if($invoice->TYPE=="Tax"){
+            echo"<tr>
+
+                 <tr class='item'>
+                <td>
+                    VAT
+                </td>
+                <td>
+                    Value Added Tax
+                </td>
+                
+                <td>
+                    &#8358; ".number_format($VAT)."
+                </td>
+
+
+
+
+
+            </tr>";
+           }
+
+
+           if($invoice->TYPE=="Tax"){
+                $total=$VAT+$total;
+            }
+
             
-            echo'<tr class="total">
+            echo'
+
+
+
+            <tr class="total">
                 <td colspan="2"></td>
                 <td>
                    Total: &#8358; '.number_format($total).'

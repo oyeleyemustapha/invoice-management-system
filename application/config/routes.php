@@ -56,3 +56,4 @@ $route['update_profile']="invoice/update_profile";
 //REPORTS
 $route['reports']="invoice/reports";
 $route['month-report']="invoice/month_report";
+$route['annual-report']="invoice/annual_report";
