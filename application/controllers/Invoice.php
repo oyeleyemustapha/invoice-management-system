@@ -89,6 +89,80 @@ class Invoice extends CI_Controller {
 	}
 	
 
+
+
+	//==============================
+    //==============================
+    //REPORTS
+    //==============================
+    //==============================
+
+	public function reports(){
+		$this->verify();
+		$data['title']="Invoice Reports";
+		$data['year']=$this->list_year();
+		$data['month']=$this->list_month();
+		$this->load->view('parts/head',$data);
+		$this->load->view('reports/reports',$data);
+		$this->load->view('parts/bottom',$data);
+	}
+
+	//GENERATE MONTHLY REPORT
+	public function month_report(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('month', 'Month', 'required');
+		$this->form_validation->set_rules('year', 'Year', 'required');
+		if($this->form_validation->run()){
+			$month_report=array(
+				'MONTH'=>date('m',strtotime($this->input->post('month'))),
+				'YEAR'=>$this->input->post('year')
+			);
+
+			$data['date']=$this->input->post('month')." ".$this->input->post('year');
+			$data['report']=$this->invoice_model->report_month($month_report);
+			$this->load->view('reports/monthReports',$data);
+		}
+	}
+
+	//GENERATE ANNUAL SALES REPORT
+	public function sales_reports_annual(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('year', 'Sales Year', 'required');
+		if($this->form_validation->run()){
+			$data['cafeteria']=$this->cafeteria_model->fetch_cafeteria()->NAME;
+			$data['date']=$this->input->post('year');
+			$data['report']=$this->cafeteria_model->sales_report_annual($this->input->post('year'));
+			$this->load->view('administrator/reports/generalYearsales',$data);
+		}
+	}
+
+
+	public function list_year(){
+		$year="";
+		$date=date('Y');
+	    $count=1;
+	    while($count<=15){
+	    	$year.="<option value='$date'>$date</option>\n";
+	        $date++;
+	        $count++;
+	    }
+	    return $year;
+	}
+
+
+	public function list_month(){
+		$month_list="<option value='' selected>Select Month</option>";
+		for ($m=1; $m<=12; $m++) {
+	     $month = date('F', mktime(0,0,0,$m, 1, date('Y')));
+	     $month_list.="<option value='$month'>$month</option>";
+	    }
+	    return $month_list;		
+	}
+
+	
+
 	//==============================
     //==============================
     //INVOICE
@@ -370,6 +444,7 @@ class Invoice extends CI_Controller {
 		$this->form_validation->set_rules('item[]', 'Service Item', 'required');
 		$this->form_validation->set_rules('description[]', 'Description', 'required');
 		$this->form_validation->set_rules('amount[]', 'Amount', 'required');
+		$this->form_validation->set_rules('type', 'Invoice Type', 'required');
 		if($this->form_validation->run()){
 			$this->load->helper('string');
 			$ref_no=random_string('numeric', 6);
@@ -382,6 +457,7 @@ class Invoice extends CI_Controller {
 					'AMOUNT'=>trim($_POST['amount'][$i]),
 					'CUSTOMER_ID'=>$this->input->post('client'),
 					'DATE_CREATED'=> date('Y-m-d'),
+					'TYPE'=>$this->input->post('type'),
 					'DUE_DATE'=>date('Y-m-d', strtotime($this->input->post('due_date'))),
 					'STATUS' => 'NOT PAID'
 				);
@@ -403,6 +479,10 @@ class Invoice extends CI_Controller {
 			if(form_error('client')){
 				$error.=form_error('client');
 			}
+
+			if(form_error('type')){
+				$error.=form_error('type');
+			} 
 
 			if(form_error('item[]')){
 				$error.=form_error('item[]');

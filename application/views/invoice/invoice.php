@@ -36,6 +36,20 @@
                                     <option></option>
                                   </select>
 
+                                  
+
+                                  </div>
+
+                                  <div class="form-group">
+
+                                    <div class="input-group">
+                                      <div class="input-group-addon">Invoice Type</div>
+                                       <select class="form-control" name="type" required="">
+                                          <option value="Client">Client</option>
+                                           <option value="Tax">Tax</option>
+                                        </select>
+                                    </div>
+                                    
 
                                   </div>
 

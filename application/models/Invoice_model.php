@@ -234,7 +234,7 @@
 
  	//GENERATE INVOICE 
  	function generate_invoice($ref_no){
- 		$this->db->select('invoice_order.REF_NO, invoice_order.SERVICE, invoice_order.DATE_CREATED, customer.NAME, invoice_order.AMOUNT, invoice_order.DESCRIPTION, invoice_order.DUE_DATE, customer.PHONE, customer.EMAIL');
+ 		$this->db->select('invoice_order.REF_NO, invoice_order.SERVICE, invoice_order.DATE_CREATED, customer.NAME, invoice_order.AMOUNT, invoice_order.DESCRIPTION, invoice_order.DUE_DATE, customer.PHONE, customer.EMAIL, invoice_order.STATUS');
  		$this->db->from('invoice_order');
  		$this->db->join('customer', 'invoice_order.CUSTOMER_ID=customer.CUSTOMER_ID', 'left');
  		$this->db->where('invoice_order.REF_NO', $ref_no);
@@ -267,6 +267,42 @@
 
 
 
+ 	//MONTHLY REPORT
+ 	function report_month($month){
+ 		$this->db->select('invoice_order.REF_NO, invoice_order.SERVICE, customer.NAME, invoice_order.AMOUNT, invoice_order.DATE_CREATED');
+ 		$this->db->from('invoice_order');
+ 		$this->db->join('customer', 'invoice_order.CUSTOMER_ID=customer.CUSTOMER_ID', 'left');
+ 		$this->db->where('MONTH(invoice_order.DATE_CREATED)', $month['MONTH']);
+ 		$this->db->where('YEAR(invoice_order.DATE_CREATED)', $month['YEAR']);
+ 		$this->db->where('invoice_order.TYPE', 'Tax');
+ 		$this->db->order_by('invoice_order.DATE_CREATED', 'ASC');
+ 		$query=$this->db->get();
+ 		if($query->num_rows()>0){
+ 			return $query->result();
+ 		}
+ 		else{
+ 			return false;
+ 		}
+ 	}
+
+
+ 	//FETCH ANNUAL REPORTS FOR A PARTICULAR YEAR
+ 	function sales_report_annual($year){
+ 		$this->db->select('products.PRODUCT, SUM(sales.QUANTITY_SOLD) SALES, products.COST_PRICE, products.SALES_PRICE');
+ 		$this->db->from('sales');
+ 		$this->db->join('products', 'products.PRODUCT_ID=sales.PRODUCT_ID', 'left');
+ 		$this->db->where('YEAR(sales.SALES_DATE)', $year);
+ 		$this->db->where('STATUS', 'Confirmed');
+ 		$this->db->group_by('sales.PRODUCT_ID');
+ 		$this->db->order_by('products.LABEL_NAME', 'ASC');
+ 		$query=$this->db->get();
+ 		if($query->num_rows()>0){
+ 			return $query->result();
+ 		}
+ 		else{
+ 			return false;
+ 		}
+ 	}
 
  	
  	

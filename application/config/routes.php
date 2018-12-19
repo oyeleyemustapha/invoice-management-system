@@ -50,3 +50,9 @@ $route['clientSelect']="invoice/get_client_list_plugin";
 //PROFILE
 $route['profile']="invoice/profile";
 $route['update_profile']="invoice/update_profile";
+
+
+
+//REPORTS
+$route['reports']="invoice/reports";
+$route['month-report']="invoice/month_report";

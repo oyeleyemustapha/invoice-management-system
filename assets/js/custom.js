@@ -221,6 +221,9 @@ $('.createInvoice').click(function(){
                         message: data
                     },{
                         type: "success",
+                        onClosed: function(){
+                          location.reload();
+                        }
                     });
                     
 

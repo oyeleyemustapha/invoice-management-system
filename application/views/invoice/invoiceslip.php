@@ -129,8 +129,14 @@
                             
                             <td class="invoicedetails">
                                 <strong>Reference No : </strong> '.$ref_no.'<br>
-                                <strong>Created: </strong>'.date('F d, Y', strtotime($invoice[0]->DATE_CREATED)).'<br>
-                                <strong>Due:</strong> '.date('F d, Y', strtotime($invoice[0]->DUE_DATE)).'
+                                <strong>Created: </strong>'.date('F d, Y', strtotime($invoice[0]->DATE_CREATED)).'<br>';
+
+
+
+                                if($invoice[0]->STATUS=="Not Paid"){
+                                    echo'<strong>Due:</strong>'. date("F d, Y", strtotime($invoice[0]->DUE_DATE));
+                                }
+                               echo'
                             </td>
                         </tr>
                     </table>

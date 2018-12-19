@@ -3262,3 +3262,7 @@ td.productName{
     font-weight: 400;
     
 }
+
+tr.tablefooter td{
+    font-weight: 600;
+}

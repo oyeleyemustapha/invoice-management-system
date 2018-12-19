@@ -88,6 +88,11 @@ echo'
                                 <a href="'.base_url().'invoice"><i class="fa fa-ticket fa-fw"></i>Invoice</a>
                             </li>
 
+
+                            <li class="has-submenu">
+                                <a href="'.base_url().'reports"><i class="fa fa-file-text fa-fw"></i>Report</a>
+                            </li>
+
                             <li class="has-submenu">
                                 <a href="'.base_url().'clients"><i class="fa fa-users fa-fw"></i>Clients</a>
                             </li>
