@@ -90,14 +90,25 @@ echo'
 
 
                             <li class="has-submenu">
+                                <a href="'.base_url().'receipts"><i class="fa fa-ticket fa-fw"></i>Reciepts</a>
+                            </li>
+
+
+                            <li class="has-submenu">
                                 <a href="'.base_url().'reports"><i class="fa fa-file-text fa-fw"></i>Report</a>
                             </li>
 
                             <li class="has-submenu">
                                 <a href="'.base_url().'clients"><i class="fa fa-users fa-fw"></i>Clients</a>
-                            </li>
+                            </li>';
 
-                            <li class="has-submenu">
+                            if($_SESSION['staff_type']=='1'){
+                                echo'<li class="has-submenu">
+                                <a href="'.base_url().'staff"><i class="fa fa-users fa-fw"></i>Staff</a>
+                            </li>';
+                            }
+                               
+                            echo '<li class="has-submenu">
                                 <a href="'.base_url().'settings"><i class="fa fa-cogs fa-fw"></i>Settings</a>
                             </li>
 

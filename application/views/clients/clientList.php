@@ -8,6 +8,7 @@ if($clients){
                                         <tr>
                                             <th>ID</th>
                                             <th>NAME</th>
+                                            <th>ACCOUNT NO</th>
                                             <th>EMAIL</th>
                                             <th>PHONE</th>
                                             <th>ADDRESS</th> 
@@ -21,6 +22,7 @@ if($clients){
                                             <tr>
                                                 <td>$counter</td>
                                                 <td>$client->NAME</td>
+                                                <td>$client->ACCOUNT_NO</td>
                                                 <td>$client->EMAIL</td>
                                                 <td>$client->PHONE</td>
                                                 <td>$client->ADDRESS</td>
@@ -39,6 +41,15 @@ if($clients){
                                     echo'</tbody>
                                 </table>
 
+
+
+    ';
+}
+else{
+    echo'
+<div class="alert alert-info">
+<h2 class="text-center">No Record Found</h2>
+</div>
 
 
     ';

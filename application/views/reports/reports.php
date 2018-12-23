@@ -10,6 +10,8 @@
                         <div class="page-title-box">
                            
                             <h4 class="page-title">Reports</h4>
+                            <br>
+                            <br>
                         </div>
                     </div>
                 </div>
@@ -32,6 +34,35 @@
                                   <button class="btn btn-danger" data-toggle="modal" data-target="#myModal2">Annual Report</button>
 
                               </div>
+<div class="clearfix"></div>
+                              
+                                <br>
+                              <div class="col-lg-8 offset-lg-2">
+                                
+
+                                <h3 class="text-center">REPORT BASED ON DATE RANGE</h3>
+                                <form method="post" action="<?php echo base_url(); ?>range-report" target="_blank">
+                                    <div class="form-group">
+                                                             <div class="input-group">
+                                                               <div class="input-group-addon"><i class="fa fa-calendar fa-fw"></i>Start Range</div>
+                                                               <input type="text" class="date form-control" name="start" required="">
+                                                             </div>
+                                                           </div>
+
+
+
+                                                            <div class="form-group">
+                                                             <div class="input-group">
+                                                               <div class="input-group-addon"><i class="fa fa-calendar fa-fw"></i>End Range</div>
+                                                               <input type="text" class="date form-control" name="end" required="">
+                                                             </div>
+                                                           </div>
+
+
+                                  <button class="btn btn-primary btn-block">Generate</button>
+                                </form>
+                              </div>
+                              
                                
                                 
 

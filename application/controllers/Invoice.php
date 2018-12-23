@@ -6,8 +6,6 @@ class Invoice extends CI_Controller {
 	public function __construct(){
         parent::__construct();
         $this->load->model('invoice_model');  
-        
-
     }	
 
 	//VERIFY USER FOR SECURITY PURPOSES
@@ -27,8 +25,6 @@ class Invoice extends CI_Controller {
 		$this->load->view('login');
 	}
 
-
-
 	//PROCESS LOGIN
 	public function login(){
 		$this->load->library('form_validation');
@@ -43,11 +39,15 @@ class Invoice extends CI_Controller {
 					$username=$staff->USERNAME;
 					$password=$staff->PASSWORD;
 					$name=$staff->NAME;
+					$staff_code=$staff->STAFF_CODE;
+					$staff_type=$staff->TYPE;
 					$session_data=array(
 						'username' => $username, 
 						'password' => $password, 
 						'staff_id'=>$staff_id, 
 						'name'=>$name,
+						'staff_code'=>$staff_code,
+						'staff_type'=>$staff_type
 					);
 				$this->session->set_userdata($session_data);
 
@@ -68,6 +68,8 @@ class Invoice extends CI_Controller {
 		$this->session->unset_userdata('username');
 		$this->session->unset_userdata('password');
 		$this->session->unset_userdata('staff_id');
+		$this->session->unset_userdata('staff_code');
+		$this->session->unset_userdata('staff_type');
 		$this->session->unset_userdata('name');
 		redirect(base_url());
 	}
@@ -87,10 +89,203 @@ class Invoice extends CI_Controller {
 		$this->load->view('profile',$data);
 		$this->load->view('parts/bottom',$data);
 	}
+
+	//UPDATE PROFILE
+	public function update_profile(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('name', 'Name', 'required');
+		$this->form_validation->set_rules('username', 'Username', 'required');
+		$this->form_validation->set_rules('password', 'Password', 'required');
+		$this->form_validation->set_rules('cpassword', 'Confirm Password', 'required|matches[password]');
+		if($this->form_validation->run()){
+			$username=strtolower(trim($this->input->post('username')));
+			$password=md5(strtolower(trim($this->input->post('password'))));
+			$profile=array(
+				'USERNAME'=>$username,
+				'NAME'=>trim($this->input->post('name')),
+				'PASSWORD'=>$password
+			);
+			if($this->invoice_model->update_profile($profile)){
+				
+				$_SESSION['username']=$username;
+				$_SESSION['password']=$password;
+				echo "Your Profile  has been updated";
+			}
+		}
+		else{
+			$error="";
+			if(form_error('name')){
+				$error.=form_error('name');
+			}
+			if(form_error('username')){
+				$error.=form_error('username');
+			}
+			if(form_error('password')){
+				$error.=form_error('password');
+			}
+			if(form_error('cpassword')){
+				$error.=form_error('cpassword');
+			}
+			echo $error;
+		}
+	}
+
+	//==============================
+    //==============================
+    //STAFF
+    //==============================
+    //==============================
+
+	public function staff(){
+		$this->verify();
+		$data['title']="Staff";
+		$data['profile']=$this->invoice_model->fetch_profile();
+		$this->load->view('parts/head',$data);
+		$this->load->view('staff/staff',$data);
+		$this->load->view('parts/bottom',$data);
+	}
+
+	//FETCH STAFF LIST
+	public function fetch_staff_list(){
+		$data['staff']=$this->invoice_model->fetch_staff_list();
+		$this->load->view('staff/staffList', $data);
+	}
+
+	//ADD STAFF
+	public function add_staff(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('name', 'Staff Name', 'required');
+		$this->form_validation->set_rules('type', 'Staff Role', 'required');
+		$this->form_validation->set_rules('username', 'Client Phone number', 'required|is_unique[staff.USERNAME]', array('is_unique' => 'This username has been taken'));
+		$this->form_validation->set_rules('password', 'Password', 'required');
+		$this->form_validation->set_rules('cpassword', 'Confirm Password', 'required|matches[password]');
+		$this->form_validation->set_rules('staff_code', 'Staff Code', 'required|is_unique[staff.STAFF_CODE]', array('is_unique' => 'This staff code has been taken'));
+		if($this->form_validation->run()){
+			$staff=array(
+				'NAME'=>trim($this->input->post('name')),
+				'USERNAME'=>strtoupper(trim($this->input->post('username'))),
+				'PASSWORD'=>md5(strtolower(trim($this->input->post('password')))),
+				'STAFF_CODE'=>trim($this->input->post('staff_code')),
+				'TYPE'=>$this->input->post('type')
+			);
+			if($this->invoice_model-> add_staff($staff)){
+				echo "Staff record has been created successfully";
+			}
+		}
+		else{
+
+			$error="";
+
+			if(form_error('name')){
+				$error.=form_error('name');
+			}
+
+			if(form_error('username')){
+				$error.=form_error('username');
+			}
+
+			if(form_error('password')){
+				$error.=form_error('password');
+			}
+
+			if(form_error('cpassowrd')){
+				$error.=form_error('cpassowrd');
+			}
+
+			if(form_error('staff_code')){
+				$error.=form_error('staff_code');
+			}
+
+			if(form_error('type')){
+				$error.=form_error('type');
+			}
+
+			echo $error;
+		}
+	}
+
+	//UPDATE STAFF RECORD
+	public function update_staff_info(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('staff_id', 'Staff ID', 'required|numeric');
+		$this->form_validation->set_rules('name', 'Staff Name', 'required');
+		$this->form_validation->set_rules('type', 'Staff Role', 'required');
+		$this->form_validation->set_rules('username', 'Username', 'required');
+		$this->form_validation->set_rules('password', 'Password', 'required');
+		$this->form_validation->set_rules('cpassword', 'Confirm Password', 'required|matches[password]');
+		$this->form_validation->set_rules('staff_code', 'Staff Code', 'required');
+		if($this->form_validation->run()){
+			$staff=array(
+				'STAFF_ID'=>$this->input->post('staff_id'),
+				'NAME'=>trim($this->input->post('name')),
+				'USERNAME'=>strtoupper(trim($this->input->post('username'))),
+				'PASSWORD'=>md5(strtolower(trim($this->input->post('password')))),
+				'STAFF_CODE'=>trim($this->input->post('staff_code')),
+				'TYPE'=>$this->input->post('type')
+			);
+			if($this->invoice_model->update_staff($staff)){
+				echo "Staff record has been updated";
+			}
+		}
+		else{
+
+			$error="";
+
+			if(form_error('name')){
+				$error.=form_error('name');
+			}
+
+			if(form_error('username')){
+				$error.=form_error('username');
+			}
+
+			if(form_error('password')){
+				$error.=form_error('password');
+			}
+
+			if(form_error('cpassowrd')){
+				$error.=form_error('cpassowrd');
+			}
+
+			if(form_error('staff_code')){
+				$error.=form_error('staff_code');
+			}
+
+			if(form_error('type')){
+				$error.=form_error('type');
+			}
+
+			echo $error;
+		}
+	}
+
+	//FETCH STAFF INFO
+	public function fetch_staff_info(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('staff_id', 'Staff ID', 'required|numeric');
+		if($this->form_validation->run()){
+			$data['staff']= $this->invoice_model->fetch_staff_info($this->input->post('staff_id'));
+			$this->load->view('staff/staffInfo', $data);
+		}
+	}
+
+	//DELETE STAFF
+	public function delete_staff(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('staff_id', 'Staff ID', 'required|numeric');
+		if($this->form_validation->run()){
+			
+			if($this->invoice_model->delete_staff($this->input->post('staff_id'))){
+				echo "Staff has been deleted";
+			}
+		}
+	}
 	
-
-
-
 	//==============================
     //==============================
     //REPORTS
@@ -135,9 +330,24 @@ class Invoice extends CI_Controller {
 			$data['report']=$this->invoice_model->annual_report($this->input->post('year'));
 			$this->load->view('reports/annualReports',$data);
 		}
-
 	}
 
+	//GENERATE REPORT BASED ON DATE RANGE
+	public function report_date_range(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('start', 'Start Range', 'required');
+		$this->form_validation->set_rules('end', 'End Range', 'required');
+		if($this->form_validation->run()){
+			$range=array(
+				'START'=>date('Y-m-d', strtotime($this->input->post('start'))),
+				'END'=>date('Y-m-d', strtotime($this->input->post('end')))
+			);
+			$data['date']=$this->input->post('start')."-".$this->input->post('end');
+			$data['report']=$this->invoice_model->range_report($range);
+			$this->load->view('reports/rangeReports',$data);
+		}
+	}
 
 	public function list_year(){
 		$year="";
@@ -151,7 +361,6 @@ class Invoice extends CI_Controller {
 	    return $year;
 	}
 
-
 	public function list_month(){
 		$month_list="<option value='' selected>Select Month</option>";
 		for ($m=1; $m<=12; $m++) {
@@ -161,7 +370,98 @@ class Invoice extends CI_Controller {
 	    return $month_list;		
 	}
 
-	
+	//==============================
+    //==============================
+    //RECIEPT
+    //==============================
+    //==============================
+
+	public function receipts(){
+		$this->verify();
+		$data['title']="Receipts";
+		//$data['receipts']=$this->invoice_model->fetch_receipt_list();
+		$this->load->view('parts/head',$data);
+		$this->load->view('receipts/receipts',$data);
+		$this->load->view('parts/bottom',$data);
+	}	
+
+	//FETCH RECEIPT LIST
+	public function receipt_list(){
+		$data['receipts']=$this->invoice_model->fetch_receipt_list();
+		$this->load->view('receipts/receiptList', $data);
+	}
+
+	//CREATE RECEIPT 
+	public function create_receipt(){
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('invoice_no', 'Invoice Number', 'required');
+		$this->form_validation->set_rules('payment_type', 'Payment Type', 'required');
+		if($this->form_validation->run()){
+			$receipt_no="R".$this->input->post('invoice_no');
+			$account_no=$this->invoice_model->fetch_customer_account_no($this->input->post('invoice_no'));
+			$reciept=array(
+				'ACCOUNT_NUMBER'=>$account_no,
+				'RECIEPT_NUMBER'=>$receipt_no,
+				'DATE_CREATED'=>date('Y-m-d'),
+				'MODE_OF_PAYMENT'=>$this->input->post('payment_type')
+			);
+			$status=$this->invoice_model->create_receipt($reciept);
+			if($status=="Receipt has been created successfully"){
+				redirect(base_url()."receipt/".$receipt_no);
+			}
+			else{
+				echo $status;
+			}
+
+			
+		}
+		else{
+
+			$error="";
+
+			if(form_error('invoice_no')){
+				$error.=form_error('invoice_no');
+			}
+
+			if(form_error('payment_type')){
+				$error.=form_error('payment_type');
+			}
+
+			echo $error;
+		}
+	}
+
+	//GENERATE RECEIPT
+	public function generate_receipt($receipt_no){
+		$data['receipt_no']=$receipt_no;
+		$data['info']=$this->invoice_model->fetch_company_info();
+		$data['receipt_info']=$this->invoice_model->fetch_receipt_info($receipt_no);
+		$data['receipt']=$this->invoice_model->generate_receipt($receipt_no);
+		$this->load->view('receipts/receipt', $data);
+	}
+
+	//DELETE RECEIPT
+	public function delete_receipt(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('receipt_no', 'Receipt Number', 'required');
+		if($this->form_validation->run()){
+			if($this->invoice_model->delete_receipt($this->input->post('receipt_no'))){
+				echo "Receipt has been deleted";
+			}
+		}
+	}
+
+	//FETCH INVOICE NO LIST[TO BE USED IN SELECT2 PLUGIN]
+	public function get_invoice_list_plugin(){
+		$this->verify();
+		$invoice_no=$this->invoice_model->fetch_invoice_no_list($_GET['search']);
+		foreach ($invoice_no as $key => $value) {
+			$data[] = array('id' => $value['REF_NO'], 'text' => $value['REF_NO']);			 	
+   		}
+		echo json_encode($data);
+	}
+
 
 	//==============================
     //==============================
@@ -176,257 +476,6 @@ class Invoice extends CI_Controller {
 		$this->load->view('invoice/invoice',$data);
 		$this->load->view('parts/bottom',$data);
 	}
-
-
-
-	//UPDATE PROFILE
-	public function update_profile(){
-		$this->verify();
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('name', 'Name', 'required');
-		$this->form_validation->set_rules('username', 'Username', 'required');
-		$this->form_validation->set_rules('password', 'Password', 'required');
-		$this->form_validation->set_rules('cpassword', 'Confirm Password', 'required|matches[password]');
-		if($this->form_validation->run()){
-			$username=strtolower(trim($this->input->post('username')));
-			$password=md5(strtolower(trim($this->input->post('password'))));
-			$profile=array(
-				'USERNAME'=>$username,
-				'NAME'=>trim($this->input->post('name')),
-				'PASSWORD'=>$password
-			);
-			if($this->invoice_model->update_profile($profile)){
-				
-				$_SESSION['username']=$username;
-				$_SESSION['password']=$password;
-				echo "Your Profile  has been updated";
-			}
-		}
-		else{
-			$error="";
-			if(form_error('name')){
-				$error.=form_error('name');
-			}
-			if(form_error('username')){
-				$error.=form_error('username');
-			}
-			if(form_error('password')){
-				$error.=form_error('password');
-			}
-			if(form_error('cpassword')){
-				$error.=form_error('cpassword');
-			}
-			echo $error;
-		}
-	}
-
-
-	//==============================
-    //==============================
-    //CLIENTS
-    //==============================
-    //==============================
-
-	public function clients(){
-		$this->verify();
-		$data['title']="Clients";
-		$this->load->view('parts/head',$data);
-		$this->load->view('clients/clients',$data);
-		$this->load->view('parts/bottom',$data);
-	}
-
-
-	public function fetch_customer_list(){
-		$data['clients']=$this->invoice_model->fetch_client_list();
-		$this->load->view('clients/clientList', $data);
-	}
-		
-	//ADD STAFF
-	public function add_client(){
-		$this->verify();
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('name', 'Client Name', 'required|is_unique[customer.NAME]', array('is_unique' => 'This Client has a profile already'));
-		$this->form_validation->set_rules('phone', 'Client Phone number', 'required');
-		$this->form_validation->set_rules('email', 'Email Address', 'required|valid_email');
-		$this->form_validation->set_rules('address', 'Address', 'required');
-		if($this->form_validation->run()){
-			$client=array(
-				'NAME'=>trim($this->input->post('name')),
-				'PHONE'=>trim($this->input->post('phone')),
-				'EMAIL'=>strtolower(trim($this->input->post('email'))),
-				'ADDRESS'=>trim($this->input->post('address'))
-			);
-			if($this->invoice_model->add_client($client)){
-				echo "Client Profile has been created";
-			}
-		}
-		else{
-
-			$error="";
-
-			if(form_error('name')){
-				$error.=form_error('name');
-			}
-
-			if(form_error('phone')){
-				$error.=form_error('phone');
-			}
-
-			if(form_error('email')){
-				$error.=form_error('email');
-			}
-
-			if(form_error('address')){
-				$error.=form_error('address');
-			}
-
-			echo $error;
-		}
-	}
-
-
-	//UPDATE CLIENT RECORD
-	public function update_client_record(){
-		$this->verify();
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('name', 'Name', 'required');
-		$this->form_validation->set_rules('phone', 'Client Phone number', 'required');
-		$this->form_validation->set_rules('email', 'Email Address', 'required|valid_email');
-		$this->form_validation->set_rules('address', 'Address', 'required');
-		if($this->form_validation->run()){
-			$client=array(
-				'CUSTOMER_ID'=>$this->input->post('customer_id'),
-				'NAME'=>trim($this->input->post('name')),
-				'PHONE'=>trim($this->input->post('phone')),
-				'EMAIL'=>strtolower(trim($this->input->post('email'))),
-				'ADDRESS'=>trim($this->input->post('address'))
-			);
-			if($this->invoice_model->update_client($client)){
-				
-				echo "Client's Record has been updated";
-			}
-		}
-		else{
-			$error="";
-			if(form_error('name')){
-				$error.=form_error('name');
-			}
-			if(form_error('phone')){
-				$error.=form_error('phone');
-			}
-			if(form_error('email')){
-				$error.=form_error('email');
-			}
-			if(form_error('address')){
-				$error.=form_error('address');
-			}
-			echo $error;
-		}
-	}
-
-
-	//FETCH CUSTOMER INFO
-	public function fetch_customer_info(){
-		$this->verify();
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('customer_id', 'Customer ID', 'required|numeric');
-		if($this->form_validation->run()){
-			$data['client']= $this->invoice_model->fetch_client_info($this->input->post('customer_id'));
-			$this->load->view('clients/clientInfo', $data);
-		}
-	}
-
-
-	
-
-	//==============================
-    //==============================
-    //SETTINGS
-    //==============================
-    //==============================
-
-	public function settings(){
-		$this->verify();
-		$data['title']="Settings";
-		$data['company']=$this->invoice_model->fetch_company_info();
-		$this->load->view('parts/head',$data);
-		$this->load->view('settings',$data);
-		$this->load->view('parts/bottom',$data);
-	}
-
-	//UPDATE COMPANY INFORMATION
-	public function update_company_info(){
-		$this->verify();
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('name', 'Company Name', 'required');
-		$this->form_validation->set_rules('phone', 'Phone Number', 'required');
-		$this->form_validation->set_rules('address', 'Address', 'required');
-		$this->form_validation->set_rules('email', 'Email Address', 'valid_email|required');
-		if($this->form_validation->run()){
-			$info=array(
-				'NAME'=>trim($this->input->post('name')),
-				'PHONE'=>trim($this->input->post('phone')),
-				'ADDRESS'=>trim($this->input->post('address')),
-				'EMAIL'=>trim($this->input->post('email'))
-			);
-			if($this->invoice_model->update_company_info($info)){
-				echo "Company Information has been updated";
-			}
-		}
-		else{
-
-			$error="";
-			if(form_error('name')){
-				$error.=form_error('name');
-			}
-			if(form_error('phone')){
-				$error.=form_error('phone');
-			}
-			if(form_error('address')){
-				$error.=form_error('address');
-			}
-			if(form_error('email')){
-				$error.=form_error('email');
-			}
-			echo $error;
-		}
-	}
-
-	//FETCH COMPANY INFO
-	public function fetch_company_info(){
-		$data['company']=$this->invoice_model->fetch_company_info();
-		$this->load->view('companyInfo', $data);
-	}
-
-	//BACKUP RECORDS IN CSV
-	public function export_records(){
-		$this->verify();
-		$this->load->dbutil();
-		$this->load->helper('file');
-		$this->load->helper('download');
-		$this->load->library('zip');
-		$database_tables=['company', 'customer', 'invoice_order', 'staff'];
-		foreach ($database_tables as $tables) {
-			$query = $this->db->query("SELECT * FROM ".$tables);
-			$data=$this->dbutil->csv_from_result($query);
-			write_file('backup/'.$tables.'-'.date("F-d-Y").'.csv', $data);
-		}
-		$this->zip->read_dir('backup', TRUE);
-		delete_files('backup/');
-		$this->zip->download('Record-'.date("F-d-Y").'.zip');
-	}
-
-
-	//FETCH CLIENT LIST [TO BE USED IN SELECT2 PLUGIN]
-	public function get_client_list_plugin(){
-		$this->verify();
-		$client=$this->invoice_model->fetch_client_list_select($_GET['search']);
-		foreach ($client as $key => $value) {
-			$data[] = array('id' => $value['CUSTOMER_ID'], 'text' => $value['NAME']);			 	
-   		}
-		echo json_encode($data);
-	}
-
 
 	//FETCH THE LIST OF CREATED INVOICE
 	public function fetch_list_created_invoice(){
@@ -448,7 +497,7 @@ class Invoice extends CI_Controller {
 		if($this->form_validation->run()){
 			$this->load->helper('string');
 
-			if($this->input->post('type')=='Tax'){
+			if($this->input->post('type')=='Tax' and $this->input->post('ref_no')!=""){
 				$ref_no=$this->input->post('ref_no');
 			}
 			else{
@@ -549,42 +598,7 @@ class Invoice extends CI_Controller {
 	}
 
 
-	//GET INVOICE INFO BY REF NO FOR EDITING
-	public function get_invoice_info_edit(){
-		$this->verify();
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('ref_no', 'Reference No', 'required|numeric');
-		if($this->form_validation->run()){
-			$data['invoice']=$this->invoice_model->invoice_info($this->input->post('ref_no'));
-			$this->load->view('invoice/invoiceEdit', $data);
-		}
-		else{
-			if(form_error('ref_no')){
-				echo form_error('ref_no');
-			}
-		}
-	}
-
-
-	//GENERATE INVOICE 
-	public function generate_invoice($ref_no){
-		$this->load->helper('text');
-			$data['invoice']=$this->invoice_model->generate_invoice($ref_no);
-			$data['ref_no']=$ref_no;
-			$data['info']=$this->invoice_model->fetch_company_info();
-			$this->load->view('invoice/invoiceslip', $data);
-	}
-
-	public function generate_invoice_pdf($ref_no){
-		$this->load->helper('text');
-		$this->load->library('pdfgenerator');
-			$data['invoice']=$this->invoice_model->generate_invoice($ref_no);
-			$data['ref_no']=$ref_no;
-			$data['info']=$this->invoice_model->fetch_company_info();
-			$invoice=$this->load->view('invoice/invoiceslip', $data, true);
-     		$this->pdfgenerator->generate($invoice, $ref_no);
-	}
-
+	
 	//UPDATE INVOICE
 	public function update_invoice(){
 		$this->verify();
@@ -648,8 +662,6 @@ class Invoice extends CI_Controller {
 		}
 	}
 
-
-
 	//UPDATE INVOICE META INFORMATION
 	public function update_invoice_meta(){
 		$this->verify();
@@ -695,6 +707,269 @@ class Invoice extends CI_Controller {
 			echo $error;
 		}
 	}
+
+
+
+	//GET INVOICE INFO BY REF NO FOR EDITING
+	public function get_invoice_info_edit(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('ref_no', 'Reference No', 'required|numeric');
+		if($this->form_validation->run()){
+			$data['invoice']=$this->invoice_model->invoice_info($this->input->post('ref_no'));
+			$this->load->view('invoice/invoiceEdit', $data);
+		}
+		else{
+			if(form_error('ref_no')){
+				echo form_error('ref_no');
+			}
+		}
+	}
+
+
+	//GENERATE INVOICE 
+	public function generate_invoice($invoice_id){
+			$this->load->helper('text');
+			$invoice_status=$this->invoice_model->fetch_invoice_type($invoice_id);
+
+			$invoice_data=array(
+				'REF_NO'=>$invoice_status->REF_NO,
+				'TYPE'=>$invoice_status->TYPE
+			);
+	
+			$data['invoice']=$this->invoice_model->generate_invoice($invoice_data);
+			$data['ref_no']=$invoice_data['REF_NO'];
+			$data['info']=$this->invoice_model->fetch_company_info();
+			$this->load->view('invoice/invoiceslip', $data);
+	}
+
+
+
+
+	//==============================
+    //==============================
+    //CLIENTS
+    //==============================
+    //==============================
+
+	public function clients(){
+		$this->verify();
+		$data['title']="Clients";
+		$this->load->view('parts/head',$data);
+		$this->load->view('clients/clients',$data);
+		$this->load->view('parts/bottom',$data);
+	}
+
+
+	public function fetch_customer_list(){
+		$data['clients']=$this->invoice_model->fetch_client_list();
+		$this->load->view('clients/clientList', $data);
+	}
+
+
+	//GENERATE ACCOUNT NUMBER FOR CLIENT
+	public function generate_account_no(){
+		$this->load->helper('string');
+		$account_no='FRA-'.random_string('numeric', 4);
+		if($this->invoice_model->check_account_no($account_no)){
+			$account_no='FRA-'.random_string('numeric', 4);
+		}
+		 return $account_no;	
+	}
+		
+	//ADD CLIENT
+	public function add_client(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('name', 'Client Name', 'required|is_unique[customer.NAME]', array('is_unique' => 'This Client has a profile already'));
+		$this->form_validation->set_rules('phone', 'Client Phone number', 'required');
+		$this->form_validation->set_rules('email', 'Email Address', 'required|valid_email');
+		$this->form_validation->set_rules('address', 'Address', 'required');
+		if($this->form_validation->run()){
+			$client=array(
+				'NAME'=>trim($this->input->post('name')),
+				'PHONE'=>trim($this->input->post('phone')),
+				'EMAIL'=>strtolower(trim($this->input->post('email'))),
+				'ADDRESS'=>trim($this->input->post('address')),
+				'OCCUPATION'=>trim($this->input->post('occupation')),
+				'RC_NUMBER'=>trim($this->input->post('rc_number')),
+				'ACCOUNT_NO'=>$this->generate_account_no()
+			);
+			if($this->invoice_model->add_client($client)){
+				echo "Client ".$client['ACCOUNT_NO']." has been created successfully";
+			}
+		}
+		else{
+
+			$error="";
+
+			if(form_error('name')){
+				$error.=form_error('name');
+			}
+
+			if(form_error('phone')){
+				$error.=form_error('phone');
+			}
+
+			if(form_error('email')){
+				$error.=form_error('email');
+			}
+
+			if(form_error('address')){
+				$error.=form_error('address');
+			}
+
+			echo $error;
+		}
+	}
+
+	//FETCH CLIENT LIST [TO BE USED IN SELECT2 PLUGIN]
+	public function get_client_list_plugin(){
+		$this->verify();
+		$client=$this->invoice_model->fetch_client_list_select($_GET['search']);
+		foreach ($client as $key => $value) {
+			$data[] = array('id' => $value['CUSTOMER_ID'], 'text' => $value['NAME']);			 	
+   		}
+		echo json_encode($data);
+	}
+
+	//UPDATE CLIENT RECORD
+	public function update_client_record(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('name', 'Name', 'required');
+		$this->form_validation->set_rules('phone', 'Client Phone number', 'required');
+		$this->form_validation->set_rules('email', 'Email Address', 'required|valid_email');
+		$this->form_validation->set_rules('address', 'Address', 'required');
+		if($this->form_validation->run()){
+			$client=array(
+				'CUSTOMER_ID'=>$this->input->post('customer_id'),
+				'NAME'=>trim($this->input->post('name')),
+				'PHONE'=>trim($this->input->post('phone')),
+				'EMAIL'=>strtolower(trim($this->input->post('email'))),
+				'ADDRESS'=>trim($this->input->post('address')),
+				'OCCUPATION'=>trim($this->input->post('occupation')),
+				'RC_NUMBER'=>trim($this->input->post('rc_number'))
+			);
+			if($this->invoice_model->update_client($client)){
+				
+				echo "Client's Record has been updated";
+			}
+		}
+		else{
+			$error="";
+			if(form_error('name')){
+				$error.=form_error('name');
+			}
+			if(form_error('phone')){
+				$error.=form_error('phone');
+			}
+			if(form_error('email')){
+				$error.=form_error('email');
+			}
+			if(form_error('address')){
+				$error.=form_error('address');
+			}
+			echo $error;
+		}
+	}
+
+	//FETCH CUSTOMER INFO
+	public function fetch_customer_info(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('customer_id', 'Customer ID', 'required|numeric');
+		if($this->form_validation->run()){
+			$data['client']= $this->invoice_model->fetch_client_info($this->input->post('customer_id'));
+			$this->load->view('clients/clientInfo', $data);
+		}
+	}
+	
+
+	//==============================
+    //==============================
+    //SETTINGS
+    //==============================
+    //==============================
+
+	public function settings(){
+		$this->verify();
+		$data['title']="Settings";
+		$data['company']=$this->invoice_model->fetch_company_info();
+		$this->load->view('parts/head',$data);
+		$this->load->view('settings',$data);
+		$this->load->view('parts/bottom',$data);
+	}
+
+	//UPDATE COMPANY INFORMATION
+	public function update_company_info(){
+		$this->verify();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('name', 'Company Name', 'required');
+		$this->form_validation->set_rules('phone', 'Phone Number', 'required');
+		$this->form_validation->set_rules('address', 'Address', 'required');
+		$this->form_validation->set_rules('email', 'Email Address', 'valid_email|required');
+		if($this->form_validation->run()){
+			$info=array(
+				'NAME'=>trim($this->input->post('name')),
+				'PHONE'=>trim($this->input->post('phone')),
+				'ADDRESS'=>trim($this->input->post('address')),
+				'EMAIL'=>trim($this->input->post('email'))
+			);
+			if($this->invoice_model->update_company_info($info)){
+				echo "Company Information has been updated";
+			}
+		}
+		else{
+
+			$error="";
+			if(form_error('name')){
+				$error.=form_error('name');
+			}
+			if(form_error('phone')){
+				$error.=form_error('phone');
+			}
+			if(form_error('address')){
+				$error.=form_error('address');
+			}
+			if(form_error('email')){
+				$error.=form_error('email');
+			}
+			echo $error;
+		}
+	}
+
+	//FETCH COMPANY INFO
+	public function fetch_company_info(){
+		$data['company']=$this->invoice_model->fetch_company_info();
+		$this->load->view('companyInfo', $data);
+	}
+
+	//BACKUP RECORDS IN CSV
+	public function export_records(){
+		$this->verify();
+		$this->load->dbutil();
+		$this->load->helper('file');
+		$this->load->helper('download');
+		$this->load->library('zip');
+		$database_tables=['company', 'customer', 'invoice_order', 'staff'];
+		foreach ($database_tables as $tables) {
+			$query = $this->db->query("SELECT * FROM ".$tables);
+			$data=$this->dbutil->csv_from_result($query);
+			write_file('backup/'.$tables.'-'.date("F-d-Y").'.csv', $data);
+		}
+		$this->zip->read_dir('backup', TRUE);
+		delete_files('backup/');
+		$this->zip->download('Record-'.date("F-d-Y").'.zip');
+	}
+
+
+	
+
+
+	
+
+	
 
 
 

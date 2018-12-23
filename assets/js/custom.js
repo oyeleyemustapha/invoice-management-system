@@ -75,6 +75,7 @@ $(document).ready(function(){
                     },{
                         type: "success",
                     }); 
+                     $('#addclientform')[0].reset();
                     $('.clientListDiv').load(base_url_admin+'fetch-client-list', client_cb);
                 }
             );
@@ -169,6 +170,34 @@ $('.createInvoice').click(function(){
         //FETCH SUBJECT FROM THE DATABASE
         ajax: {
                 url: base_url_admin+"clientSelect",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+        },
+        minimumInputLength: 3
+    });
+
+
+
+    //FETCH INVOICE NUMBER LIST TO BE USED FOR SELECT2 PLUGIN
+    $("#invoiceSelect").select2({
+        placeholder: "Search with Invoice Number",
+        allowClear: true, 
+        theme: "classic",
+        width: '100%',
+        //FETCH SUBJECT FROM THE DATABASE
+        ajax: {
+                url: base_url_admin+"get-invoice-no",
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
@@ -379,7 +408,7 @@ $('.createInvoice').click(function(){
   $('#invoiceType').change(function(){
       if($(this).val()=="Tax"){
         var html='<div class="form-group"><div class="input-group">';
-        html+='<div class="input-group-addon">Reference No</div><input type="text" class="form-control" name="ref_no" required></div></div>';
+        html+='<div class="input-group-addon">Reference No</div><input type="text" class="form-control" name="ref_no"></div></div>';
         $('.append').append(html);
       }
   });
@@ -387,6 +416,156 @@ $('.createInvoice').click(function(){
 
 
 
+var staff_cb=function(){
+     $('.staff-list-table').DataTable({
+        
+         "drawCallback": function( settings ) {
+            //DELETE STAFF
+            $('.deleteStaff').click(function(){
+                 var staff_id=$(this).attr('id');
+                        swal({
+                          title: 'Are you sure of this ?',
+                          text: "You can't be reverted!",
+                          type: 'warning',
+                          showCancelButton: true,
+                          confirmButtonColor: '#D62C1A',
+                          cancelButtonColor: '#2C3E50',
+                          confirmButtonText: 'Yes, delete it!'
+                      }).then(function () {
+                          $.post( 
+                        base_url_admin+"deleteStaff", 
+                        {staff_id:staff_id}, 
+                        function(data){
+                           $.notify({
+                                message: data
+                            },{
+                                type: "success",
+                            });
+
+                            $('.staff-list').load(base_url_admin+'staff-list', staff_cb);
+                          
+                        }
+                    );
+                          });
+            });
+
+
+            //EDIT STAFF PROFILE
+
+            $('.editstaff').click(function(){
+                 $.post( 
+                    base_url_admin+"fetch_staff_info", 
+                    {staff_id:$(this).attr('id')}, 
+                    function(data){
+
+                      $('#staffModal').modal('show');
+                       $('#staffModal .modal-body').html(data);
+
+
+                         //UPDATE STAFF INFORMATION
+                          $('#updateStaffForm').submit(function(){
+                              $.post( 
+                                base_url_admin+"update_staff", 
+                                $(this).serialize(), 
+                                function(data){
+                                  $('#staffModal').modal('hide');
+                                  $('.staff-list').load(base_url_admin+'staff-list', staff_cb);
+                                  $.notify({
+                                      message: data
+                                  },{
+                                      type: "success",
+                                  });
+                                }
+                              );
+                              return false;
+                              $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+                              $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+                          });
+
+
+                          
+                    }
+                  );
+            });
+         }
+
+    });
+  }
+  $('.staff-list').load(base_url_admin+'staff-list', staff_cb);
+
+   //ADD STAFF
+    $('#addstafform').submit(function(){
+            $.post( 
+                base_url_admin+"addStaff", 
+                $(this).serialize(), 
+                function(data){
+                  $('#myModal').modal('hide');
+                  $('#addstafform')[0].reset();
+                   $('.staff-list').load(base_url_admin+'staff-list', staff_cb);
+                    
+                     $.notify({
+                        message: data
+                    },{
+                        type: "success"
+                    });
+                    
+
+                }
+            );
+             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+             return false;          
+    });
+
+
+
+   $('.createReceipt').click(function(){
+      $('.recieptform').toggle();
+   });
+
+
+     var receipt_cb=function(){
+     $('.receiptTable').DataTable({
+        
+         "drawCallback": function( settings ) {
+
+            //DELETE RECEIPT
+            $('.deleteReceipt').click(function(){
+                 var receipt_no=$(this).attr('id');
+                        swal({
+                          title: 'Are you sure of this ?',
+                          text: "You can't be reverted!",
+                          type: 'warning',
+                          showCancelButton: true,
+                          confirmButtonColor: '#D62C1A',
+                          cancelButtonColor: '#2C3E50',
+                          confirmButtonText: 'Yes, delete it!'
+                      }).then(function () {
+                          $.post( 
+                        base_url_admin+"deleteReceipt", 
+                        {receipt_no:receipt_no}, 
+                        function(data){
+                           $.notify({
+                                message: data
+                            },{
+                                type: "success",
+                            });
+
+                            $('.receiptList').load(base_url_admin+'receiptList', receipt_cb);
+                          
+                        }
+                    );
+                          });
+            });
+
+
+
+
+         }
+
+    });
+  }
+  $('.receiptList').load(base_url_admin+'receiptList', receipt_cb);
 
 
 

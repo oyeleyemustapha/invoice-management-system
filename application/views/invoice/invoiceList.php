@@ -18,17 +18,25 @@ if($invoices){
                                     <tbody>';
                                     $counter=1;
                                     foreach ($invoices as $invoice) {
+
+
+                                        if($invoice->TYPE=="Tax"){
+                                            $type="<span class='badge badge-info'>Tax</span>";
+                                        }
+                                        else{
+                                            $type="<span class='badge badge-primary'>Client</span>";
+                                        }
                                         echo"
                                             <tr>
                                                 <td>$counter</td>
-                                                <td><a href='#' data-refNo='$invoice->REF_NO' class='getInfo'>$invoice->REF_NO</a></td>
+                                                <td><a href='#' data-refNo='$invoice->REF_NO' class='getInfo'>$invoice->REF_NO</a> $type</td>
                                                 <td>$invoice->NAME</td>
                                                 <td>$invoice->SERVICE</td>
                                                 <td>".date('M d, Y', strtotime($invoice->DATE_CREATED))."</td>
                                                 <td>$invoice->STATUS</td>
                                                 <td>
 
-                                                    <a href='".base_url()."generateInvoice/$invoice->REF_NO' class='btn btn-info btn-sm' target='_blank'>Generate Invoice</a>
+                                                    <a href='".base_url()."generateInvoice/$invoice->INVOICE_ID' class='btn btn-info btn-sm' target='_blank'>Generate Invoice</a>
                                                     <button class='btn btn-primary btn-sm editInvoice' data-refNo='$invoice->REF_NO'>Edit</button>
                                                     <button class='btn btn-danger btn-sm deleteInvoiceItem' id='$invoice->INVOICE_ID'>Delete</button>
                                                 </td>

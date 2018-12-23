@@ -2464,6 +2464,7 @@ body {
     background-color: #A48A79;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
     padding-left: 0
+  
 }
 
 #topnav .navbar-toggle {
@@ -3230,7 +3231,7 @@ td.productName{
     border: 1px solid #5E3023;
 }
 
-#create_Invoice, .addItem{
+#create_Invoice, .addItem, .recieptform{
     display: none;
 }
 

@@ -17,6 +17,14 @@ if($client){
                                                            </div>
 
                                                            <div class="form-group">
+                                                               <input type="text" name="rc_number" class="form-control" placeholder="RC Number" value="'.$client->RC_NUMBER.'">
+                                                           </div>
+
+                                                           <div class="form-group">
+                                                               <input type="text" name="occupation" class="form-control" placeholder="Occupation" value="'.$client->OCCUPATION.'">
+                                                           </div>
+
+                                                           <div class="form-group">
                                                                <textarea class="form-control" name="address">'.$client->ADDRESS.'</textarea>
                                                            </div>
                                                             

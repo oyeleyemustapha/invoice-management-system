@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice : <?php  echo $ref_no; ?></title>
+    <title>Invoice : <?php  echo $receipt_no; ?></title>
     
     <style>
     .invoice-box {
@@ -123,7 +123,9 @@ td.title p{
 
 
       <?php
-        if($invoice){
+
+    //var_dump($receipt);
+        if($receipt){
 
          
 
@@ -144,15 +146,15 @@ td.title p{
                             </td>
                             
                             <td class="invoicedetails">
-                                <strong>Invoice No : </strong> '.$ref_no.'<br>
+                                <strong>Receipt No : </strong> '.$receipt_no.'<br>
                                 <strong>Tax Identification Number : </strong> 20866279-0001<br>
-                                <strong>Created: </strong>'.date('F d, Y', strtotime($invoice[0]->DATE_CREATED)).'<br>';
+                                <strong>Created : </strong>'.date('F d, Y', strtotime($receipt_info->DATE_CREATED)).'<br>
+                                <strong>Mode of Payment :</strong> '.$receipt_info->MODE_OF_PAYMENT.'
+
+                                ';
 
 
 
-                                if($invoice[0]->STATUS=="NOT PAID"){
-                                    echo'<strong>Due:</strong>'. date("F d, Y", strtotime($invoice[0]->DUE_DATE));
-                                }
                                echo'
                             </td>
                         </tr>
@@ -174,15 +176,17 @@ td.title p{
                             </td>
                             
                             <td class="invoicedetails">
-                              <strong> '.$invoice[0]->NAME.'</strong><br>
-                              <strong>'.$invoice[0]->ACCOUNT_NO.'</strong><br>
-                                '.$invoice[0]->PHONE.'<br>
-                                '.$invoice[0]->EMAIL.'
+                              <strong> '.$receipt[0]->NAME.'</strong><br>
+                              <strong>'.$receipt[0]->ACCOUNT_NO.'</strong><br>
+                                '.$receipt[0]->PHONE.'<br>
+                                '.$receipt[0]->EMAIL.'
                             </td>
                         </tr>
                     </table>
                 </td>
             </tr>
+          
+            
             
            
             
@@ -207,11 +211,11 @@ td.title p{
             $total=0;
             $counter=1;
             $total_vat=0;
-            foreach ($invoice as $invoice) {
-            $VAT=(5/100)*$invoice->AMOUNT;
+            foreach ($receipt as $receipt) {
+            $VAT=(5/100)*$receipt->AMOUNT;
 
             $total_vat+=$VAT;
-              $total+=$invoice->AMOUNT;
+              $total+=$receipt->AMOUNT;
 
 
 
@@ -221,14 +225,14 @@ td.title p{
                     $counter
                 </td>
                 <td>
-                    $invoice->SERVICE
+                    $receipt->SERVICE
                 </td>
                 <td>
-                    $invoice->DESCRIPTION
+                    $receipt->DESCRIPTION
                 </td>
                 
                 <td>
-                    &#8358; ".number_format($invoice->AMOUNT)."
+                    &#8358; ".number_format($receipt->AMOUNT)."
                 </td>
             </tr>
 
@@ -240,7 +244,7 @@ td.title p{
             
             
             
-           if($invoice->TYPE=="Tax"){
+           if($receipt->TYPE=="Tax"){
             $last_counter=($counter-1)+1;
             echo"<tr>
                     
@@ -268,7 +272,7 @@ td.title p{
            }
 
 
-           if($invoice->TYPE=="Tax"){
+           if($receipt->TYPE=="Tax"){
                 $total=$total_vat+$total;
             }
 
