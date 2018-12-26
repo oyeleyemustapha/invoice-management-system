@@ -3231,7 +3231,7 @@ td.productName{
     border: 1px solid #5E3023;
 }
 
-#create_Invoice, .addItem, .recieptform{
+#create_Invoice, .addItem, .recieptform, #creditNoteform{
     display: none;
 }
 

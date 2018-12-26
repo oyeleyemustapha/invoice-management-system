@@ -29,7 +29,7 @@ if($invoices){
                                         echo"
                                             <tr>
                                                 <td>$counter</td>
-                                                <td><a href='#' data-refNo='$invoice->REF_NO' class='getInfo'>$invoice->REF_NO</a> $type</td>
+                                                <td>$invoice->REF_NO $type</td>
                                                 <td>$invoice->NAME</td>
                                                 <td>$invoice->SERVICE</td>
                                                 <td>".date('M d, Y', strtotime($invoice->DATE_CREATED))."</td>
@@ -37,7 +37,7 @@ if($invoices){
                                                 <td>
 
                                                     <a href='".base_url()."generateInvoice/$invoice->INVOICE_ID' class='btn btn-info btn-sm' target='_blank'>Generate Invoice</a>
-                                                    <button class='btn btn-primary btn-sm editInvoice' data-refNo='$invoice->REF_NO'>Edit</button>
+                                                    <button class='btn btn-primary btn-sm editInvoice' data-refNo='$invoice->REF_NO' data-invoice-type='$invoice->TYPE'>Edit</button>
                                                     <button class='btn btn-danger btn-sm deleteInvoiceItem' id='$invoice->INVOICE_ID'>Delete</button>
                                                 </td>
                                             </tr>

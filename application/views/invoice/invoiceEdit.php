@@ -21,8 +21,9 @@ if($invoice){
       <p>REFERENCE NO : <span>'.$invoice[0]->REF_NO.'</span></p>
       
       <form method="post" id="invoicemetainfo">
-           <input type="hidden" value="'.$invoice[0]->REF_NO.'" name="ref_no" required>
 
+           <input type="hidden" value="'.$invoice[0]->REF_NO.'" name="ref_no" required>
+           <input type="hidden" value="'.$invoice[0]->TYPE.'" name="type" required>
 
            <div class="form-group">
         <div class="input-group">
@@ -55,6 +56,8 @@ if($invoice){
 
     </div>
      <form method="post" id="updateInvoiceform">
+      <input type="hidden" value="'.$invoice[0]->TYPE.'" name="type" required>
+
      <input type="hidden" value="'.$invoice[0]->REF_NO.'" name="ref_no" required>
      <input type="hidden" value="'.$invoice[0]->DATE_CREATED.'" name="date_created" required>
      <input type="hidden" value="'.$invoice[0]->CUSTOMER_ID.'" name="customer_id" required>

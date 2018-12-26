@@ -72,6 +72,14 @@ $route['update_staff']="invoice/update_staff_info";
 $route['receipts']="invoice/receipts";
 $route['get-invoice-no']="invoice/get_invoice_list_plugin";
 $route['create-receipt']="invoice/create_receipt";
-$route['receipt/(:any)']="invoice/generate_receipt/$1";
+$route['receipt/(:any)/(:num)']="invoice/generate_receipt/$1/$2";
 $route['receiptList']="invoice/receipt_list";
 $route['deleteReceipt']="invoice/delete_receipt";
+$route['fetch_services']="invoice/fetch_service_items";
+
+//CREDIT NOTE
+$route['credit-notes']="invoice/credit_notes";
+$route['fetch_reciept_items']="invoice/fetch_receipt_items";
+$route['create-credit_note']="invoice/create_credit_note";
+$route['credit-note/(:any)/(:any)']="invoice/generate_credit_note/$1/$2";
+$route['credit-notes-list']="invoice/fetch_credit_note_list";

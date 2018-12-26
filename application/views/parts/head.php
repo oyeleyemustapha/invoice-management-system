@@ -93,6 +93,9 @@ echo'
                                 <a href="'.base_url().'receipts"><i class="fa fa-ticket fa-fw"></i>Reciepts</a>
                             </li>
 
+                            <li class="has-submenu">
+                                <a href="'.base_url().'credit-notes"><i class="fa fa-file-text-o fa-fw"></i>Credit Notes</a>
+                            </li>
 
                             <li class="has-submenu">
                                 <a href="'.base_url().'reports"><i class="fa fa-file-text fa-fw"></i>Report</a>

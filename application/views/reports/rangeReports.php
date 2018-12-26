@@ -54,7 +54,7 @@
       <tr>
         <th>ID</th>
         <th>CLIENT</th>
-        <th>REF NO</th>
+        <th>RECIEPT NO</th>
         <th>DATE CREATED</th>
         <th>SERVICE</th>
         <th>AMOUNT</th>
@@ -72,9 +72,9 @@
         $total_vat=0;
         $overall_total=0;
         foreach ($report as $report) {
-          $total_amt+=$report->AMOUNT;
-          $VAT=(5/100)*$report->AMOUNT;
-          $total=$VAT+$report->AMOUNT;
+          $total_amt+=$report->AMOUNT_PAID;
+          $VAT=(5/100)*$report->AMOUNT_PAID;
+          $total=$VAT+$report->AMOUNT_PAID;
           $overall_total+=$total;
           $total_vat+=$VAT;
 
@@ -82,11 +82,11 @@
           <tr>
         <td>$counter</td>
         <td>$report->NAME</td>
-        <td>$report->REF_NO</td>
+        <td>$report->RECIEPT_NUMBER</td>
         <td>".date('M d, Y', strtotime($report->DATE_CREATED))."</td>
 
         <td>$report->SERVICE</td>
-        <td>&#8358; ".number_format($report->AMOUNT)."</td>
+        <td>&#8358; ".number_format($report->AMOUNT_PAID)."</td>
         <td>&#8358; ".number_format($VAT)."</td>
         <td>&#8358; ".number_format($total)."</td>
       </tr>

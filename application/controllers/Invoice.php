@@ -285,6 +285,119 @@ class Invoice extends CI_Controller {
 			}
 		}
 	}
+
+
+	//==============================
+    //==============================
+    //CREDIT NOTES
+    //==============================
+    //==============================
+
+	public function credit_notes(){
+		$this->verify();
+		$data['title']="Credit Notes";
+		$this->load->view('parts/head',$data);
+		$this->load->view('creditNotes/creditnotes',$data);
+		$this->load->view('parts/bottom',$data);
+	}
+
+
+	//FETCH CREDIT NOTE LIST
+	public function fetch_credit_note_list(){
+		$data['credit_notes']=$this->invoice_model->fetch_creditNotes_list();
+		$this->load->view('creditNotes/creditNoteList', $data);
+	}
+
+
+	//FETCH SERVICES FROM RECIEPT TABLE TO BE DISPLAYED IN CREDIT NOTE GENERATION FORM
+	public function fetch_receipt_items(){
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('reciept_no', 'Reciept Number', 'required');
+		if($this->form_validation->run()){
+			$data['services']=$this->invoice_model->fetch_reciept_items($this->input->post('reciept_no'));
+
+			$this->load->view('creditNotes/servicesList', $data);
+			
+		}
+	}
+
+
+
+	//CREATE CREDIT NOTE 
+	public function create_credit_note(){
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('type', 'Credit Note Type', 'required');
+		$this->form_validation->set_rules('reciept_no', 'Reciept Number', 'required');
+		$this->form_validation->set_rules('account_no', 'Account Number', 'required');
+		$this->form_validation->set_rules('service[]', 'Service Item', 'required');
+		$this->form_validation->set_rules('description[]', 'Description', 'required');
+		$this->form_validation->set_rules('amount[]', 'Amount', 'required');
+		if($this->form_validation->run()){
+			$credit_note_no=str_replace('R', 'CN',  $this->input->post('reciept_no'));
+			
+			for ($i=0; $i < count($_POST['service']) ; $i++) { 
+				$amount_paid=str_replace(',', '', $_POST['amount'][$i]);
+				$credit_note=array(
+					'TYPE'=>$this->input->post('type'),
+					'ACCOUNT_NUMBER'=>$this->input->post('account_no'),
+					'CREDIT_NOTE_NUMBER'=>$credit_note_no,
+					'DATE_CREATED'=>date('Y-m-d'),
+					'SERVICE'=>$_POST['service'][$i],
+					'DESCRIPTION'=>$_POST['description'][$i],
+					'AMOUNT_PAID'=>$amount_paid
+				);
+				$status=$this->invoice_model->create_notes($credit_note, $this->input->post('reciept_no'));
+			
+				if($i==count($_POST['service'])-1){
+					if($status=="Credit Note has been created successfully"){
+						redirect(base_url()."credit-note/".$credit_note_no.'/'.$credit_note["TYPE"]);
+					}
+					else{
+						echo $status;
+					}
+				}	
+			}
+		}
+		else{
+
+			$error="";
+
+			if(form_error('invoice_no')){
+				$error.=form_error('invoice_no');
+			}
+
+			if(form_error('type')){
+				$error.=form_error('type');
+			}			
+			
+
+			if(form_error('amount[]')){
+				$error.=form_error('amount[]');
+			}
+
+			if(form_error('service[]')){
+				$error.=form_error('service[]');
+			}
+
+			if(form_error('description[]')){
+				$error.=form_error('description[]');
+			}
+
+			
+			echo $error;
+		}
+	}
+
+
+	//GENERATE CREDIT NOTE
+	public function generate_credit_note($credit_note_no, $type){
+		$data['credit_note_no']=$credit_note_no;
+		$data['info']=$this->invoice_model->fetch_company_info();
+		$data['credit_info']=$this->invoice_model->fetch_credit_note_info($credit_note_no, $type);
+		$data['creditNote']=$this->invoice_model->generate_credit_note($credit_note_no, $type);
+		$this->load->view('creditNotes/creditnote', $data);
+	}
+
 	
 	//==============================
     //==============================
@@ -391,26 +504,69 @@ class Invoice extends CI_Controller {
 		$this->load->view('receipts/receiptList', $data);
 	}
 
+	//FETCH SERVICES FROM INVOICE TABLE TO BE DISPLAYED IN RECEIPT GENERATION FORM
+	public function fetch_service_items(){
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('invoice_no', 'Invoice Number', 'required');
+		if($this->form_validation->run()){
+			$data['services']=$this->invoice_model->fetch_service_items($this->input->post('invoice_no'));
+
+			$this->load->view('receipts/servicesList', $data);
+			
+		}
+	}
+	
+
 	//CREATE RECEIPT 
 	public function create_receipt(){
 		$this->load->library('form_validation');
 		$this->form_validation->set_rules('invoice_no', 'Invoice Number', 'required');
 		$this->form_validation->set_rules('payment_type', 'Payment Type', 'required');
+		$this->form_validation->set_rules('service[]', 'Service Item', 'required');
+		$this->form_validation->set_rules('description[]', 'Description', 'required');
+		$this->form_validation->set_rules('amount[]', 'Amount', 'required');
+		$this->form_validation->set_rules('receipt_type', 'Receipt Type', 'required');
+		$this->form_validation->set_rules('payment_status', 'Payment Status', 'required');
 		if($this->form_validation->run()){
-			$receipt_no="R".$this->input->post('invoice_no');
+			$receipt_no="R".trim($this->input->post('invoice_no'));
 			$account_no=$this->invoice_model->fetch_customer_account_no($this->input->post('invoice_no'));
-			$reciept=array(
-				'ACCOUNT_NUMBER'=>$account_no,
-				'RECIEPT_NUMBER'=>$receipt_no,
-				'DATE_CREATED'=>date('Y-m-d'),
-				'MODE_OF_PAYMENT'=>$this->input->post('payment_type')
-			);
-			$status=$this->invoice_model->create_receipt($reciept);
-			if($status=="Receipt has been created successfully"){
-				redirect(base_url()."receipt/".$receipt_no);
+			$last_batch_no=$this->invoice_model->fetch_batch_no($receipt_no);
+			if($last_batch_no){
+				$new_batch=$last_batch_no+1;
 			}
 			else{
-				echo $status;
+				$new_batch=1;
+			}
+
+			
+			for ($i=0; $i < count($_POST['service']) ; $i++) { 
+				
+				$amount_paid=str_replace(',', '', $_POST['amount'][$i]);
+				$reciept=array(
+					'ACCOUNT_NUMBER'=>$account_no,
+					'RECIEPT_NUMBER'=>$receipt_no,
+					'DATE_CREATED'=>date('Y-m-d'),
+					'MODE_OF_PAYMENT'=>$this->input->post('payment_type'),
+					'SERVICE'=>$_POST['service'][$i],
+					'DESCRIPTION'=>$_POST['description'][$i],
+					'AMOUNT_PAID'=>$amount_paid,
+					'PAYMENT_STATUS'=>$this->input->post('payment_status'),
+					'RECIEPT_TYPE'=>$this->input->post('receipt_type'),
+					'BATCH'=>$new_batch
+				);
+				$status=$this->invoice_model->create_receipt($reciept);
+				
+				
+				if($i==count($_POST['service'])-1){
+					if($status=="Receipt has been created successfully"){
+						redirect(base_url()."receipt/".$receipt_no."/$new_batch");
+					}
+					else{
+						echo $status;
+					}
+				}
+
+				
 			}
 
 			
@@ -423,6 +579,25 @@ class Invoice extends CI_Controller {
 				$error.=form_error('invoice_no');
 			}
 
+			if(form_error('receipt_type')){
+				$error.=form_error('receipt_type');
+			}
+
+
+			
+
+			if(form_error('amount[]')){
+				$error.=form_error('amount[]');
+			}
+
+			if(form_error('service[]')){
+				$error.=form_error('service[]');
+			}
+
+			if(form_error('description[]')){
+				$error.=form_error('description[]');
+			}
+
 			if(form_error('payment_type')){
 				$error.=form_error('payment_type');
 			}
@@ -432,11 +607,11 @@ class Invoice extends CI_Controller {
 	}
 
 	//GENERATE RECEIPT
-	public function generate_receipt($receipt_no){
+	public function generate_receipt($receipt_no, $batch){
 		$data['receipt_no']=$receipt_no;
 		$data['info']=$this->invoice_model->fetch_company_info();
 		$data['receipt_info']=$this->invoice_model->fetch_receipt_info($receipt_no);
-		$data['receipt']=$this->invoice_model->generate_receipt($receipt_no);
+		$data['receipt']=$this->invoice_model->generate_receipt($receipt_no, $batch);
 		$this->load->view('receipts/receipt', $data);
 	}
 
@@ -444,23 +619,19 @@ class Invoice extends CI_Controller {
 	public function delete_receipt(){
 		$this->verify();
 		$this->load->library('form_validation');
-		$this->form_validation->set_rules('receipt_no', 'Receipt Number', 'required');
+		$this->form_validation->set_rules('receiptData[]', 'Receipt Number', 'required');
 		if($this->form_validation->run()){
-			if($this->invoice_model->delete_receipt($this->input->post('receipt_no'))){
+			$reciept=array(
+			'RECIEPT_NO'=>$_POST['receiptData']['receipt_no'],
+			'BATCH'=>$_POST['receiptData']['batch']
+			);
+			if($this->invoice_model->delete_receipt($reciept)){
 				echo "Receipt has been deleted";
 			}
 		}
 	}
 
-	//FETCH INVOICE NO LIST[TO BE USED IN SELECT2 PLUGIN]
-	public function get_invoice_list_plugin(){
-		$this->verify();
-		$invoice_no=$this->invoice_model->fetch_invoice_no_list($_GET['search']);
-		foreach ($invoice_no as $key => $value) {
-			$data[] = array('id' => $value['REF_NO'], 'text' => $value['REF_NO']);			 	
-   		}
-		echo json_encode($data);
-	}
+	
 
 
 	//==============================
@@ -504,13 +675,9 @@ class Invoice extends CI_Controller {
 				$ref_no=random_string('numeric', 6);
 			}
 
-
-
-
-			
 			for ($i=0; $i < count($_POST['item']) ; $i++) { 
-				
 				$invoice=array(
+					'STAFF_CODE'=>$_SESSION['staff_code'],
 					'REF_NO'=>$ref_no,
 					'SERVICE'=>trim($_POST['item'][$i]),
 					'DESCRIPTION'=>trim($_POST['description'][$i]),
@@ -526,16 +693,10 @@ class Invoice extends CI_Controller {
 				if($i==count($_POST['item'])-1){
 					echo 'Invoice has been created';
 				}
-
-				
 			}
-			
-			
 		}
 		else{
-
 			$error="";
-
 			if(form_error('client')){
 				$error.=form_error('client');
 			}
@@ -597,13 +758,11 @@ class Invoice extends CI_Controller {
 		}
 	}
 
-
-	
 	//UPDATE INVOICE
 	public function update_invoice(){
 		$this->verify();
 		$this->load->library('form_validation');
-		//$this->form_validation->set_rules('invoice_id[]', 'Invoice ID', 'required|numeric');
+		$this->form_validation->set_rules('type', 'Invoice Type', 'required');
 		$this->form_validation->set_rules('item[]', 'Service Item', 'required');
 		$this->form_validation->set_rules('description[]', 'Description', 'required');
 		$this->form_validation->set_rules('amount[]', 'Amount', 'required');
@@ -613,6 +772,7 @@ class Invoice extends CI_Controller {
 
 				if($_POST['invoice_id'][$i]!=""){
 					$invoice=array(
+						'TYPE'=>$this->input->post('type'),
 						'INVOICE_ID'=>$_POST['invoice_id'][$i],
 						'SERVICE'=>trim($_POST['item'][$i]),
 						'DESCRIPTION'=>trim($_POST['description'][$i]),
@@ -622,6 +782,7 @@ class Invoice extends CI_Controller {
 				}
 				else{
 					$new_invoice=array(
+						'TYPE'=>$this->input->post('type'),
 						'REF_NO'=>$_POST['ref_no'],
 						'SERVICE'=>trim($_POST['item'][$i]),
 						'DESCRIPTION'=>trim($_POST['description'][$i]),
@@ -668,10 +829,10 @@ class Invoice extends CI_Controller {
 		$this->load->library('form_validation');
 		$this->form_validation->set_rules('status', 'Payment Status', 'required');
 		$this->form_validation->set_rules('ref_no', 'Reference Number', 'required');
+		$this->form_validation->set_rules('type', 'Invoice Type', 'required');
 		$this->form_validation->set_rules('due_date', 'Due Date', 'required');
 		$this->form_validation->set_rules('date_created', 'Date Created', 'required');
 		if($this->form_validation->run()){
-			
 		
 					$invoice=array(
 						'REF_NO'=>$this->input->post('ref_no'),
@@ -714,14 +875,18 @@ class Invoice extends CI_Controller {
 	public function get_invoice_info_edit(){
 		$this->verify();
 		$this->load->library('form_validation');
-		$this->form_validation->set_rules('ref_no', 'Reference No', 'required|numeric');
+		$this->form_validation->set_rules('invoiceData[]', 'Invoice Data', 'required');
 		if($this->form_validation->run()){
-			$data['invoice']=$this->invoice_model->invoice_info($this->input->post('ref_no'));
+			$invoice_data=array(
+				'REF_NO'=>$_POST['invoiceData']['invoice_no'],
+				'TYPE'=>$_POST['invoiceData']['invoice_type']
+			);
+			$data['invoice']=$this->invoice_model->invoice_info($invoice_data);
 			$this->load->view('invoice/invoiceEdit', $data);
 		}
 		else{
-			if(form_error('ref_no')){
-				echo form_error('ref_no');
+			if(form_error('invoiceData')){
+				echo form_error('invoiceData');
 			}
 		}
 	}
@@ -952,7 +1117,7 @@ class Invoice extends CI_Controller {
 		$this->load->helper('file');
 		$this->load->helper('download');
 		$this->load->library('zip');
-		$database_tables=['company', 'customer', 'invoice_order', 'staff'];
+		$database_tables=['company', 'customer', 'invoice_order', 'staff', 'credit_notes', 'reciepts'];
 		foreach ($database_tables as $tables) {
 			$query = $this->db->query("SELECT * FROM ".$tables);
 			$data=$this->dbutil->csv_from_result($query);

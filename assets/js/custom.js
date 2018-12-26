@@ -11,15 +11,41 @@ $(document).ready(function(){
 	 	format:'MM yyyy',
 	 	autoclose: true
 	 });
-	//STAFF
 
+
+    //UPDATE PROFILE
+    $('#UpdateProfile').submit(function(){
+            $.post( 
+                base_url_admin+"update_profile", 
+                $(this).serialize(), 
+                function(data){
+                    
+                     $.notify({
+                        message: data
+                    },{
+                        type: "success",
+                        onClosed: function(){
+                          location.reload();
+                        }
+                    });
+                    
+
+                }
+            );
+             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+             return false;          
+    });
+
+
+	//=============================
+  //=============================
+  //CLIENTS
+  //=============================
+  //=============================
 	var client_cb=function(){
 		 $('.staffList').DataTable({
-        
          "drawCallback": function( settings ) {
-
-
-
               //EDIT CLIENT RECORD
               $('.editClient').click(function(){
                     $.post( 
@@ -58,110 +84,32 @@ $(document).ready(function(){
                 $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});       
               });
          }
-
     });
 	}
 	$('.clientListDiv').load(base_url_admin+'fetch-client-list', client_cb);
 
 	//ADD CLIENT
 	$('#addclientform').submit(function(){
-            $.post( 
-                base_url_admin+"add-client", 
-                $(this).serialize(), 
-                function(data){
-                    $('#myModal').modal('hide');
-                     $.notify({
-                        message: data
-                    },{
-                        type: "success",
-                    }); 
-                     $('#addclientform')[0].reset();
-                    $('.clientListDiv').load(base_url_admin+'fetch-client-list', client_cb);
-                }
-            );
-             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
-             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
-             return false;          
-    });
-
-
-	//STAFF LOGS
-	$('.logDiv').load(base_url_admin+'fetchLogs', function(){
-		$('.log').DataTable();
-	});
-
-	
-    //UPDATE COMPANY'S INFORMATION
-	  $('#updateCompanyinfo').submit(function(){
-            $.post( 
-                base_url_admin+"update-company-info", 
-                $(this).serialize(), 
-                function(data){
-                    companyInfo();
-                    $('#modal-id').modal('hide');
-                     $.notify({
-                        message: data
-                    },{
-                        type: "success",
-                    });  
-                }
-            );
-             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
-             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
-             return false;          
-    });
-
-    function companyInfo(){
-      $('.companyInfo').load(base_url_admin+"fetch-company-info");
-    }
-
-    companyInfo();
-
-
-
-   
-
-    //SALES
-     $("#staff-List").select2({
-        placeholder: "Type Staff Name",
-        allowClear: true, 
-        theme: "classic",
-        width: '100%',
-        minimumInputLength: 3
-    });
-
-
-     
-
-
-
-//AD ITEM FORM
-$('.addItem').click(function(){
-  var form='<div class="row"><div class="col-lg-4"><div class="form-group">';
-  form+=' <input type="text" name="item[]" placeholder="Item" class="form-control-lg form-control" required=""></div></div>';
-  form+='<div class="col-lg-5"><div class="form-group"><input type="text" name="description[]" placeholder="Description" class="form-control-lg form-control" required=""></div></div>';                             
-  form+='<div class="col-lg-3"><div class="input-group"><input type="text" name="amount[]" placeholder="Amount" class="form-control-lg form-control" required="">';
-  form+='<span class="input-group-btn"><button type="button" class="btn btn-lg btn-danger removeItem"><i class="fa fa-minus"></i></button></span></div></div>';
-
-  $('.items').append(form);
-
-  //REMOVE ITEM
-  $('.removeItem').click(function(){
-   
-    $(this).closest('.row').remove();
+    $.post( 
+      base_url_admin+"add-client", 
+      $(this).serialize(), 
+      function(data){
+        $('#myModal').modal('hide');
+          $.notify({
+            message: data
+        },{
+            type: "success",
+        }); 
+        $('#addclientform')[0].reset();
+        $('.clientListDiv').load(base_url_admin+'fetch-client-list', client_cb);
+      }
+    );
+      $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+      $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+      return false;          
   });
-});
 
-
-//CREATE INVOICE
-$('.createInvoice').click(function(){
-  $('#create_Invoice, .addItem').toggle();
-});
-
-
-
-
-    //FETCH CLIENT LIST TO BE USED FOR SELECT2 PLUGIN
+  //FETCH CLIENT LIST TO BE USED FOR SELECT2 PLUGIN
     $("#clientSelect").select2({
         placeholder: "Type Client Name Here",
         allowClear: true, 
@@ -188,8 +136,64 @@ $('.createInvoice').click(function(){
     });
 
 
+  //=============================
+  //=============================
+  //COMPANY INFO
+  //=============================
+  //=============================
+	
+    //UPDATE COMPANY'S INFORMATION
+	  $('#updateCompanyinfo').submit(function(){
+      $.post( 
+        base_url_admin+"update-company-info", 
+        $(this).serialize(), 
+        function(data){
+          companyInfo();
+          $('#modal-id').modal('hide');
+            $.notify({
+              message: data
+          },{
+              type: "success",
+          });  
+        }
+      );
+        $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+        $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+        return false;          
+    });
 
-    //FETCH INVOICE NUMBER LIST TO BE USED FOR SELECT2 PLUGIN
+    function companyInfo(){
+      $('.companyInfo').load(base_url_admin+"fetch-company-info");
+    }
+
+    companyInfo();
+
+  //=============================
+  //=============================
+  //INVOICE
+  //=============================
+  //=============================
+
+  //ADD SERVICE DYNAMICALLY
+  $('.addItem').click(function(){
+    var form='<div class="row"><div class="col-lg-4"><div class="form-group">';
+    form+=' <input type="text" name="item[]" placeholder="Item" class="form-control-lg form-control" required=""></div></div>';
+    form+='<div class="col-lg-5"><div class="form-group"><input type="text" name="description[]" placeholder="Description" class="form-control-lg form-control" required=""></div></div>';                             
+    form+='<div class="col-lg-3"><div class="input-group"><input type="text" name="amount[]" placeholder="Amount" class="form-control-lg form-control" required="">';
+    form+='<span class="input-group-btn"><button type="button" class="btn btn-lg btn-danger removeItem"><i class="fa fa-minus"></i></button></span></div></div>';
+    $('.items').append(form);
+    //REMOVE ITEM
+    $('.removeItem').click(function(){
+      $(this).closest('.row').remove();
+    });
+  });
+
+  //CREATE INVOICE
+  $('.createInvoice').click(function(){
+    $('#create_Invoice, .addItem').toggle();
+  });
+
+  //FETCH INVOICE NUMBER LIST TO BE USED FOR SELECT2 PLUGIN
     $("#invoiceSelect").select2({
         placeholder: "Search with Invoice Number",
         allowClear: true, 
@@ -215,7 +219,7 @@ $('.createInvoice').click(function(){
         minimumInputLength: 3
     });
 
-    //CREATE INVOICE
+  //CREATE INVOICE
     $('#create_Invoice').submit(function(){
             $.post( 
                 base_url_admin+"create_invoice", 
@@ -238,38 +242,9 @@ $('.createInvoice').click(function(){
              return false;          
     });
 
-
-     //UPDATE PROFILE
-    $('#UpdateProfile').submit(function(){
-            $.post( 
-                base_url_admin+"update_profile", 
-                $(this).serialize(), 
-                function(data){
-                    
-                     $.notify({
-                        message: data
-                    },{
-                        type: "success",
-                        onClosed: function(){
-                          location.reload();
-                        }
-                    });
-                    
-
-                }
-            );
-             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
-             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
-             return false;          
-    });
-
-
-    var invoice_cb=function(){
+  var invoice_cb=function(){
      $('.invoiceList').DataTable({
-        
          "drawCallback": function( settings ) {
-
-
             //DELETE INVOICE ITEM
             $('.deleteInvoiceItem').click(function(){
                  var invoice_id=$(this).attr('id');
@@ -295,32 +270,23 @@ $('.createInvoice').click(function(){
                         }
                     );
                           });
-               
             });
 
-            //FETCH INVOICE INFO
-            $('.getInfo').click(function(){
-                $.post( 
-                        base_url_admin+"invoiceInfo", 
-                        {ref_no:$(this).attr('data-refNo')}, 
-                        function(data){
-                          $('#invoiceModal').modal('show');
-                          $('#invoiceModal .modal-body').html(data);
-
-                            
-                        }
-                    );
-                $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
-                $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
-
-            });
+           
 
 
             //EDIT INVOICE INFO
             $('.editInvoice').click(function(){
+                var invoice_number=$(this).attr('data-refNo');
+                var invoice_type=$(this).attr('data-invoice-type');
+
+             
                 $.post( 
                         base_url_admin+"edit_invoice", 
-                        {ref_no:$(this).attr('data-refNo')}, 
+                         {invoiceData:{
+                          "invoice_no":invoice_number,
+                          "invoice_type":invoice_type
+                        }}, 
                         function(data){
                           $('#invoiceModal').modal('show');
                           $('#invoiceModal .modal-body').html(data);
@@ -393,30 +359,29 @@ $('.createInvoice').click(function(){
                     );
                 $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
                 $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
-
             });
-
-
-
          }
+      });
+    }
+    $('.invoice-List').load(base_url_admin+'fetch_invoices', invoice_cb);
+    
+    $('#invoiceType').change(function(){
+        if($(this).val()=="Tax"){
+          var html='<div class="form-group"><div class="input-group">';
+          html+='<div class="input-group-addon">Reference No</div><input type="text" class="form-control refNo" name="ref_no"></div></div>';
+          $('.append').append(html);
 
+
+        }
     });
-  }
-  $('.invoice-List').load(base_url_admin+'fetch_invoices', invoice_cb);
 
+  //=============================
+  //=============================
+  //STAFF
+  //=============================
+  //=============================
 
-  $('#invoiceType').change(function(){
-      if($(this).val()=="Tax"){
-        var html='<div class="form-group"><div class="input-group">';
-        html+='<div class="input-group-addon">Reference No</div><input type="text" class="form-control" name="ref_no"></div></div>';
-        $('.append').append(html);
-      }
-  });
-
-
-
-
-var staff_cb=function(){
+  var staff_cb=function(){
      $('.staff-list-table').DataTable({
         
          "drawCallback": function( settings ) {
@@ -523,15 +488,50 @@ var staff_cb=function(){
       $('.recieptform').toggle();
    });
 
+   $('.InvoiceNO').keyup(function(){
+      if($(this).val().length>=6){
+         $.post( 
+                base_url_admin+"fetch_services", 
+                {invoice_no: $(this).val()}, 
+                function(data){
+                    $('.services').html(data);
 
+                }
+            );
+             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+      }
+   });
+
+   $('.ReceiptNo').keyup(function(){
+      if($(this).val().length>=6){
+         $.post( 
+                base_url_admin+"fetch_reciept_items", 
+                {reciept_no: $(this).val()}, 
+                function(data){
+                    $('.creditnoteItem').html(data);
+
+                }
+            );
+             $(document).ajaxSend(function(event, xhr, settings) {$(".preloader").fadeIn();});
+             $(document).ajaxComplete(function(event, xhr, settings) {$(".preloader").fadeOut();});
+      }
+   });
+
+  //=============================
+  //=============================
+  //RECIEPT
+  //=============================
+  //=============================
+   
      var receipt_cb=function(){
-     $('.receiptTable').DataTable({
-        
+        $('.receiptTable').DataTable({
          "drawCallback": function( settings ) {
 
             //DELETE RECEIPT
             $('.deleteReceipt').click(function(){
-                 var receipt_no=$(this).attr('id');
+                 var receipt_no=$(this).attr('data-receipt-no');
+                 var batch=$(this).attr('data-batch');
                         swal({
                           title: 'Are you sure of this ?',
                           text: "You can't be reverted!",
@@ -543,7 +543,12 @@ var staff_cb=function(){
                       }).then(function () {
                           $.post( 
                         base_url_admin+"deleteReceipt", 
-                        {receipt_no:receipt_no}, 
+                        {receiptData:{
+                          "receipt_no":receipt_no,
+                          "batch":batch
+                        }},
+
+                      
                         function(data){
                            $.notify({
                                 message: data
@@ -557,23 +562,25 @@ var staff_cb=function(){
                     );
                           });
             });
-
-
-
-
-         }
-
-    });
-  }
-  $('.receiptList').load(base_url_admin+'receiptList', receipt_cb);
+          }
+        });
+      }
+    $('.receiptList').load(base_url_admin+'receiptList', receipt_cb);
 
 
 
     
          
 
-    
+$('.creditNotes-List').load(base_url_admin+'credit-notes-list', function(){
+  $('.notesList').DataTable();
+});
 
+$('.createCrediteNote').click(function(){
+  $('#creditNoteform').toggle();
+});
+    
+        
 
  
    

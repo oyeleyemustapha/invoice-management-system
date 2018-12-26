@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice : <?php  echo $ref_no; ?></title>
+    <title>Credit Note : <?php  echo $credit_note_no; ?></title>
     
     <style>
     .invoice-box {
@@ -123,7 +123,9 @@ td.title p{
 
 
       <?php
-        if($invoice){
+
+    
+        if($creditNote){
 
          
 
@@ -144,15 +146,15 @@ td.title p{
                             </td>
                             
                             <td class="invoicedetails">
-                                <strong>Invoice No : </strong> '.$ref_no.'<br>
+                                <strong>Credit Note No : </strong> '.$credit_note_no.'<br>
                                 <strong>Tax Identification Number : </strong> 20866279-0001<br>
-                                <strong>Created: </strong>'.date('F d, Y', strtotime($invoice[0]->DATE_CREATED)).'<br>';
+                                <strong>Created : </strong>'.date('F d, Y', strtotime($credit_info->DATE_CREATED)).'<br>
+                                
+
+                                ';
 
 
 
-                                if($invoice[0]->STATUS=="NOT PAID"){
-                                    echo'<strong>Due:</strong>'. date("F d, Y", strtotime($invoice[0]->DUE_DATE));
-                                }
                                echo'
                             </td>
                         </tr>
@@ -174,15 +176,17 @@ td.title p{
                             </td>
                             
                             <td class="invoicedetails">
-                              <strong> '.$invoice[0]->NAME.'</strong><br>
-                              <strong>'.$invoice[0]->ACCOUNT_NO.'</strong><br>
-                                '.$invoice[0]->PHONE.'<br>
-                                '.$invoice[0]->EMAIL.'
+                              <strong> '.$creditNote[0]->NAME.'</strong><br>
+                              <strong>'.$creditNote[0]->ACCOUNT_NO.'</strong><br>
+                                '.$creditNote[0]->PHONE.'<br>
+                                '.$creditNote[0]->EMAIL.'
                             </td>
                         </tr>
                     </table>
                 </td>
             </tr>
+          
+            
             
            
             
@@ -207,11 +211,11 @@ td.title p{
             $total=0;
             $counter=1;
             $total_vat=0;
-            foreach ($invoice as $invoice) {
-            $VAT=(5/100)*$invoice->AMOUNT;
+            foreach ($creditNote as $creditNote) {
+            $VAT=(5/100)*$creditNote->AMOUNT_PAID;
 
             $total_vat+=$VAT;
-              $total+=$invoice->AMOUNT;
+              $total+=$creditNote->AMOUNT_PAID;
 
 
 
@@ -221,14 +225,14 @@ td.title p{
                     $counter
                 </td>
                 <td>
-                    $invoice->SERVICE
+                    $creditNote->SERVICE
                 </td>
                 <td>
-                    $invoice->DESCRIPTION
+                    $creditNote->DESCRIPTION
                 </td>
                 
                 <td>
-                    &#8358; ".number_format($invoice->AMOUNT)."
+                    &#8358; ".number_format($creditNote->AMOUNT_PAID)."
                 </td>
             </tr>
 
@@ -240,7 +244,7 @@ td.title p{
             
             
             
-           if($invoice->TYPE=="Tax"){
+           if($credit_info->TYPE=="Tax"){
             $last_counter=($counter-1)+1;
             echo"<tr>
                     
@@ -268,7 +272,7 @@ td.title p{
            }
 
 
-           if($invoice->TYPE=="Tax"){
+           if($credit_info->TYPE=="Tax"){
                 $total=$total_vat+$total;
             }
 
@@ -291,8 +295,8 @@ td.title p{
         <p><strong>FOR : FINITE RISK ADVISORS LIMITED</strong></p>
 
         <br><br>
-       <strong> '.$invoice->STAFF.'</strong><br>
-        '.$invoice->STAFF_CODE.'
+       <strong> '.$_SESSION["name"].'</strong><br>
+        '.$_SESSION["staff_code"].'
         </div>
             ';
         }

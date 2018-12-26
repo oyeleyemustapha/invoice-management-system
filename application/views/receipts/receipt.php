@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice : <?php  echo $receipt_no; ?></title>
+    <title>Reciept : <?php  echo $receipt_no; ?></title>
     
     <style>
     .invoice-box {
@@ -149,7 +149,8 @@ td.title p{
                                 <strong>Receipt No : </strong> '.$receipt_no.'<br>
                                 <strong>Tax Identification Number : </strong> 20866279-0001<br>
                                 <strong>Created : </strong>'.date('F d, Y', strtotime($receipt_info->DATE_CREATED)).'<br>
-                                <strong>Mode of Payment :</strong> '.$receipt_info->MODE_OF_PAYMENT.'
+                                <strong>Mode of Payment :</strong> '.$receipt_info->MODE_OF_PAYMENT.'<br>
+                                <strong>Payment Term :</strong> '.$receipt[0]->PAYMENT_STATUS.' Payment
 
                                 ';
 
@@ -212,10 +213,10 @@ td.title p{
             $counter=1;
             $total_vat=0;
             foreach ($receipt as $receipt) {
-            $VAT=(5/100)*$receipt->AMOUNT;
+            $VAT=(5/100)*$receipt->AMOUNT_PAID;
 
             $total_vat+=$VAT;
-              $total+=$receipt->AMOUNT;
+              $total+=$receipt->AMOUNT_PAID;
 
 
 
@@ -232,7 +233,7 @@ td.title p{
                 </td>
                 
                 <td>
-                    &#8358; ".number_format($receipt->AMOUNT)."
+                    &#8358; ".number_format($receipt->AMOUNT_PAID)."
                 </td>
             </tr>
 
@@ -244,7 +245,7 @@ td.title p{
             
             
             
-           if($receipt->TYPE=="Tax"){
+           if($receipt->RECIEPT_TYPE=="Tax"){
             $last_counter=($counter-1)+1;
             echo"<tr>
                     
@@ -272,7 +273,7 @@ td.title p{
            }
 
 
-           if($receipt->TYPE=="Tax"){
+           if($receipt->RECIEPT_TYPE=="Tax"){
                 $total=$total_vat+$total;
             }
 

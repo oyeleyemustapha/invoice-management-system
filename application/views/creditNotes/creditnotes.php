@@ -9,7 +9,7 @@
                     <div class="col-sm-12">
                         <div class="page-title-box">
                            
-                            <h4 class="page-title">Receipts</h4>
+                            <h4 class="page-title">Credit Notes</h4>
                         </div>
                     </div>
                 </div>
@@ -23,69 +23,29 @@
                     <div class="col-md-12">
                         <div class="card m-b-30">
                             <div class="card-body">
-                                <h4 class="mt-0 header-title"><button class="btn btn-success btn-sm createReceipt"><i class="fa fa-plus fa-fw"></i>Generate Reciept</button>
-                                  
+                                <h4 class="mt-0 header-title"><button class="btn btn-success btn-sm createCrediteNote"><i class="fa fa-file-text-o fa-fw"></i>Generate Credit Note</button>
+                                 
 
                                 </h4>
-                                <div class="col-lg-8 offset-lg-2 recieptform">
+                                <div class="col-lg-12">
                                   
-                                  <form method="post" action="<?php echo base_url(); ?>create-receipt" target="_blank">
-                                   
-                                  <div class="form-group clientname">
-                                    <div class="input-group">
-                                      <div class="input-group-addon">Invoice No</div>
-                                    <input type="text" class="form-control InvoiceNO" name="invoice_no" required>
-                                  </div>
-                                
+                                  <form method="post" action="<?php echo base_url(); ?>create-credit_note" target="_blank" id="creditNoteform">
                                     
-
-                                  
-
+                                  <div class="form-group">
+                                   <input type="text" name="reciept_no" required="" class="form-control ReceiptNo" placeholder="Type Reciept Number">
                                   </div>
 
                                   <div class="form-group">
-                                    <div class="input-group">
-                                      <div class="input-group-addon">Payment Type</div>
-                                       <select class="form-control" name="payment_type" required="">
-                                        <option value="">Select Payment Type</option>
-                                          <option value="Cash">Cash</option>
-                                           <option value="Cheque">Cheque</option>
-                                           <option value="Bank Transfer">Bank Transfer</option>
-                                        </select>
-                                    </div>
+                                   <select class="form-control" required="" name="type">
+                                     <option value="">Select Credit Note Type</option>
+                                     <option value="Tax">Tax</option>
+                                     <option value="Client">Client</option>
+                                   </select>
                                   </div>
 
-                                  <div class="form-group">
-                                    <div class="input-group">
-                                      <div class="input-group-addon">Receipt Type</div>
-                                       <select class="form-control" name="receipt_type" required="">
-                                        <option value="">Select Receipt Type</option>
-                                          <option value="Client">Client</option>
-                                           <option value="Tax">Tax</option>
-                                        
-                                        </select>
-                                    </div>
-                                  </div>
+                                  <div class="creditnoteItem"></div>
 
-                                   <div class="form-group">
-                                    <div class="input-group">
-                                      <div class="input-group-addon">Payment Status</div>
-                                       <select class="form-control" name="payment_status" required="">
-                                        <option value="">Select Payment Status</option>
-                                          <option value="Full">Full Payment</option>
-                                           <option value="Part">Part Payment</option>
-                                           <option value="Balance">Balance Payment</option>
-
-                                           
-                                        </select>
-                                    </div>
-                                  </div>
-
-                                  <div class="services"></div>
                                   
-
-
-                               
                                   <button class="btn btn-primary">Generate</button>
                                 </form>
                                 </div>
@@ -107,12 +67,10 @@
                     <div class="col-md-12">
                         <div class="card m-b-30">
                             <div class="card-body">
-                               <div class="receiptList table-responsive">
-                                 
-
-                               </div>
+                               <div class="creditNotes-List table-responsive"></div>
                                 
-                               
+
+
                                 
 
                                
